@@ -120,7 +120,7 @@ func _draw():
 	draw_rect(Rect2(Vector2(-outline_thickness,-outline_thickness),game.card_size + Vector2(2,2) * outline_thickness), Color(0,0,0,1))
 	draw_rect(Rect2(Vector2(0,0),game.card_size),colour)
 
-func set_location(new_loc, animated = false, from_position = position, duration = 0.1, recheckneeded = false):
+func set_location(new_loc, animated = false, from_position = position, duration = game.animation_speed, recheckneeded = false):
 	moving = false
 	if recheckneeded:
 		#get_substack()
@@ -153,7 +153,7 @@ func move_to_temp_storage(slot):
 		position = game.get_temp_slot_position(slot)
 		z_index = 1
 
-func move_to_final_storage(slot, animated = true, duration = 0.5):
+func move_to_final_storage(slot, animated = true, duration = game.animation_speed):
 	# check if slot is of correct type
 	if slot == type:
 		# check if condition is true
@@ -184,7 +184,7 @@ func move_to_final_storage(slot, animated = true, duration = 0.5):
 		return false
 		
 
-func remove_joker(animated = true, duration = 0.5):
+func remove_joker(animated = true, duration = game.animation_speed):
 	if type == 3:
 		# remove from stack
 		game.remove_from_stack(self,location.x)
@@ -261,7 +261,8 @@ func is_uppermost():
 			return true
 
 func interpolate_position():
-	position = old_position + (desired_position - old_position) * (animation_timer / animation_time)
+	if animation_time > 0:
+		position = old_position + (desired_position - old_position) * (animation_timer / animation_time)
 	if animation_timer >= animation_time:
 		animating = false
 		animation_timer = 0

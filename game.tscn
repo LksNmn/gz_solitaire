@@ -175,7 +175,64 @@ selection_enabled = false
 override_selected_font_color = false
 _sections_unfolded = [ "Caret", "Margin", "custom_fonts" ]
 
-[node name="Label2" type="Label" parent="." index="6"]
+[node name="Speedslider" type="HSlider" parent="." index="6"]
+
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -58.0
+margin_top = -16.0
+margin_right = 58.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+focus_mode = 2
+mouse_filter = 0
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 0
+min_value = 0.0
+max_value = 1.0
+step = 0.1
+page = 0.0
+value = 0.5
+exp_edit = false
+rounded = false
+editable = true
+tick_count = 10
+ticks_on_borders = false
+focus_mode = 2
+_sections_unfolded = [ "Anchor", "Margin" ]
+
+[node name="Statslabel" type="RichTextLabel" parent="." index="7"]
+
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -196.0
+margin_top = -44.0
+rect_pivot_offset = Vector2( 0, 0 )
+rect_clip_content = false
+mouse_filter = 2
+mouse_default_cursor_shape = 0
+size_flags_horizontal = 1
+size_flags_vertical = 4
+custom_fonts/normal_font = ExtResource( 2 )
+bbcode_enabled = false
+bbcode_text = ""
+visible_characters = -1
+percent_visible = 1.0
+meta_underlined = true
+tab_size = 4
+text = ""
+scroll_active = true
+scroll_following = false
+selection_enabled = false
+override_selected_font_color = false
+_sections_unfolded = [ "Caret", "Margin", "custom_fonts" ]
+
+[node name="Label2" type="Label" parent="." index="8"]
 
 visible = false
 anchor_left = 0.5
@@ -209,5 +266,7 @@ _sections_unfolded = [ "Anchor", "Caret", "Focus", "Grow Direction", "Hint", "Mo
 [connection signal="button_up" from="Button3" to="." method="_on_Button3_button_up"]
 
 [connection signal="button_up" from="Button4" to="." method="_on_Button4_button_up"]
+
+[connection signal="value_changed" from="Speedslider" to="." method="_on_Speedslider_value_changed"]
 
 

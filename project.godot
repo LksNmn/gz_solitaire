@@ -12,6 +12,7 @@ config_version=3
 
 config/name="Another Solitaire"
 run/main_scene="res://game.tscn"
+boot_splash/fullsize=false
 config/icon="res://Untitled.png"
 
 [display]

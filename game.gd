@@ -1,3 +1,4 @@
+
 extends Node
 
 # this node creates the deck, shuffles the cards and keeps track of the individual stacks and handles the "dragon" buttons and behaviour
@@ -11,6 +12,7 @@ var canremove = [false,false,false]
 
 # rechecking
 var recheck_requested
+var game_over = false
 
 # meta stuff
 var accepts_input = false
@@ -21,6 +23,7 @@ onready var seed_display = get_node("Label")
 var somethings_animating = false
 var shuffling = false
 var shuffling_stack = 0
+var animation_speed = 0.3
 
 # location parameters
 var stacked_offset = 20
@@ -32,15 +35,29 @@ var screen_size = Vector2()
 var card_size = Vector2()
 var scale
 
+# stats
+var statfilepath = "user://stats.sav"
+var stats = {
+	wins = 0,
+	games = 0
+	}
+
 # buttons
 onready var buttonred = get_node("Button")
 onready var buttongreen = get_node("Button2")
 onready var buttonblue = get_node("Button3")
-
 onready var win_label = get_node("Label2")
+onready var stats_label = get_node("Statslabel")
 
 
 func _ready():
+	# try to load stats
+	if not load_stats():
+		print("stats not loaded")
+		save_stats()
+	elif stats.games == 0:
+		save_stats()
+	update_stats_label()
 	get_tree().connect("screen_resized", self, "_on_screen_resized")
 	var newseed = rand_seed(OS.get_unix_time())[1]
 	seed(newseed)
@@ -54,6 +71,41 @@ func _ready():
 	update()
 	set_process(true)
 	set_process_input(true)
+
+func update_stats_label():
+	stats_label.text = "Games won: " + str(stats.wins)
+
+func load_stats():
+	var statfile = File.new()
+	if not statfile.file_exists(statfilepath):
+		print("no stats file found")
+		return false
+	# Open file
+	if statfile.open(statfilepath, File.READ) != 0:
+	    print("Error opening file")
+	    return false
+	var parseresult = JSON.parse(statfile.get_as_text())
+	if parseresult.error != OK:
+		print(parseresult.result)
+		print("failed to parse JSON")
+		return false
+	stats = parseresult.result
+	print("stats loaded")
+	return true
+
+func save_stats():
+	# open directory
+	var gamedir = Directory.new()
+	gamedir.change_dir("user://")
+	# Open a file
+	var statfile = File.new()
+	if statfile.open(statfilepath, File.WRITE) != 0:
+	    print("Error opening file")
+	    return
+	
+	statfile.store_line(JSON.print(stats))
+	print("stats saved to " + gamedir.get_current_dir())
+	statfile.close()
 
 func reset_game(newseed = OS.get_unix_time()):
 	accepts_input = false
@@ -75,6 +127,8 @@ func reset_game(newseed = OS.get_unix_time()):
 	final_storage = [null,null,null]
 	canremove = [false,false,false]
 	generate_deck()
+	stats.games += 1
+	save_stats()
 	shuffling = true
 
 func _process(delta):
@@ -88,13 +142,14 @@ func _process(delta):
 				deck.remove(card_index)
 				cards.append(shuffeled_card)
 				shuffeled_card.z_index = deck.size()
-				shuffeled_card.set_location(Vector2(shuffling_stack,stack[shuffling_stack].size()), true, get_final_slot_position(-1) ,0.05)
+				shuffeled_card.set_location(Vector2(shuffling_stack,stack[shuffling_stack].size()), true, get_final_slot_position(-1) ,animation_speed / 4)
 				shuffling_stack += 1
 				if shuffling_stack > stack.size() - 1:
 					shuffling_stack = 0
 			if deck.size() == 0:
 				shuffling = false
 				accepts_input = true
+				game_over = false
 				recheck()
 		
 		
@@ -128,9 +183,13 @@ func generate_deck():
 	deck.append(new_card)
 
 func update_sizes():
+	
 	# set proportions
-	screen_size = OS.get_real_window_size()
+	screen_size = get_viewport().get_visible_rect().size
+	
 	scale = 1920.0 / screen_size.x
+	print(screen_size)
+	
 	card_width = screen_size.x / 13
 	card_height = screen_size.y / 5
 	card_size = Vector2(card_width,card_height)
@@ -235,9 +294,13 @@ func recheck():
 	for individual_stack in stack:
 		for card in individual_stack:
 			remaining_cards += 1
-	if remaining_cards == 0:
+	if remaining_cards == 0 and game_over == false:
+		game_over = true
 		print("You Win!")
 		win_label.visible = true
+		stats.wins += 1
+		update_stats_label()
+		save_stats()
 
 func _on_screen_resized():
 	update_sizes()
@@ -287,3 +350,7 @@ func _on_Button4_button_up():
 	if input == 0:
 		input = rand_seed(OS.get_unix_time())[1]
 	reset_game(input)
+
+
+func _on_Speedslider_value_changed(value):
+	animation_speed = value
